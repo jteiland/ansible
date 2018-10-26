@@ -1,0 +1,24 @@
+- hosts: dns_hq_servers  #this should be a local host file on your machine
+  become: true
+  become_method: sudo
+  vars_prompt:
+   - name: "dns_entry" 
+     prompt: "What entry do you want to add?( will only resolve from Malauzai HQ)?"
+     private: no
+   - name: "ip_address" 
+     prompt: "What IP should it resolve to?"
+     private: no  
+  tasks:
+      - blockinfile:
+          dest: /etc/dnsmasq.hosts
+          state: present
+          block: |
+            {{item.ip }} {{ item.name }}
+          marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.name }}"
+          insertafter: EOF
+        with_items:
+          - { name: "{{dns_entry}}", ip: "{{ip_address}}" } 
+
+      - service:
+          name: dnsmasq
+          state: restarted 

@@ -1,0 +1,31 @@
+## YOU NEED TO INSTALL Passlib on your local machine to encrypt 'sudo pip install passlib'
+- name: Create user account
+  become: yes
+  become_method: sudo
+  hosts: asr_centos6 
+  gather_facts: False
+  serial: 1
+  vars_prompt:
+  - name: "user_name"
+    prompt: "What do you want for the username?"
+    private: no
+  - name: "password"
+    prompt: "Enter the randomly generated password for this user"
+    private: yes
+    encrypt: "sha512_crypt"
+    confirm: yes 
+
+  tasks:
+  - user:
+     name: "{{user_name}}"
+     comment: "Created with Ansible"
+     state: present
+     password: "{{password}}"
+
+#  - lineinfile:
+#          dest: /etc/sudoers.d/appadmins
+#          state: present
+#          create: yes
+#          mode: u=r,g=r,o-r
+#          insertafter: EOF
+#          line: '{{user_name}} ALL=(ALL) ALL' 

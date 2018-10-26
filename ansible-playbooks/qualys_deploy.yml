@@ -1,0 +1,26 @@
+---
+- hosts: qualys_hosts
+  become: yes
+  become_method: sudo
+  vars_prompt:
+  - name: "ActivationId"
+    prompt: "Enter the activation id"
+    private: no
+  - name: "CustomerId"
+    prompt: "Enter the customer id"
+    private: no
+
+  tasks: 
+    - name: copy file to server
+      copy:
+        src: /tmp/qualys-cloud-agent.x86_64.rpm 
+        dest: /tmp/qualys-cloud-agent.x86_64.rpm 
+
+
+    - name: Install package.
+      yum:
+        name: /tmp/qualys-cloud-agent.x86_64.rpm 
+        state: present
+    
+    - name: run install script
+      command: sudo sh /usr/local/qualys/cloud-agent/bin/qualys-cloud-agent.sh ActivationId="{{ ActivationId }}"  CustomerId="{{ CustomerId }}"

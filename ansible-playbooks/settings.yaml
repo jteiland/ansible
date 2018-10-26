@@ -1,0 +1,14 @@
+#definition file for pexpect script
+switch01:   
+       host: #IP ADDRESS or HOSTNAME
+       user: #LOGIN USER NAME
+       password: password
+#switch02:
+#       host:
+#       user: 
+#       password:
+#switch03:
+#       host: 
+#       user:
+#       password:
+

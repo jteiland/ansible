@@ -1,0 +1,19 @@
+---
+- hosts: 192.168.33.10 
+  tasks:
+    - name: yum update from cache
+      become: true
+      become_user: root
+      command: yum -yC update 
+    
+    - name: reboot
+      become: true
+      become_user: root
+      command: reboot
+
+    - name: wait for servers to come back online
+      local_action:
+        module: wait_for
+        host: "{{ inventory_hostname }}"
+        port: 22
+        delay: 10

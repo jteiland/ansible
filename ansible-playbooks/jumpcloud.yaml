@@ -1,0 +1,26 @@
+- hosts: ordjump 
+  become: yes
+
+  tasks:
+    - name: Install curl package (Debian based)
+      action: apt pkg='curl' state=installed
+      when: "'$ansible_pkg_mgr' == 'apt'"
+    
+    - name: Install curl package (RedHat based)
+      action: yum name='curl' state=installed
+      when: "'$ansible_pkg_mgr' == 'yum'"
+
+    - name: Check if JumpCloud is already installed
+      shell: "[ -d /opt/jc ] && echo 'Found' || echo ''"
+      register: jc_installed
+
+#    - name: Update time
+#      shell: "ntpdate -u pool.ntp.org"
+#      when: "not jc_installed.stdout"
+
+    - name: Install JumpCloud
+      shell: "curl --silent --show-error --header 'x-connect-key: YOUR_CONNECT_KEY' https://kickstart.jumpcloud.com/Kickstart | sudo bash"
+      when: "not jc_installed.stdout"
+   #The connect key should be replaced by key from the JumpCloud portal 
+    - name: restart jcagent
+      service: name=jcagent state=restarted

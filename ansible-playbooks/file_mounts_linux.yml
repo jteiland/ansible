@@ -1,0 +1,18 @@
+- hosts:  mounts
+  become: true
+  tasks:
+      - name: format disk with mkfs
+        filesystem:
+          fstype: ext4
+          dev: /dev/sdc1
+
+      - name: create mount dir
+        command: mkdir -p /work_area
+
+      - name: mount dev to dir
+        mount:
+          path: /work_area
+          src: /dev/sdc1
+          fstype: ext4
+          state: mounted
+          backup: yes 

@@ -1,0 +1,8 @@
+- hosts:  host_files   
+  become: true
+  tasks:
+      - lineinfile:
+          dest: /etc/hosts
+          state: present
+          insertafter: EOF
+#          line: '10.90.94.202	webdir-dri01.fiservapps.solutions' #this will need to contain the host you want to add

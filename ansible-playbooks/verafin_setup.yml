@@ -1,0 +1,28 @@
+##After this runs, You need to perform steps 5-7 from here -  malauzai.atlassian.net/wiki/spaces/DCOPS/pages/565739567/Verafin+Setup
+---
+- name: Get the Bank Name
+  hosts: sftp.malauzai.com
+  become: yes
+  gather_facts: False
+  vars_prompt:
+  - name: "orgID"
+    prompt: "What is the orgID?"
+    private: no
+
+  tasks:
+  - name: copy verafin template directory to new directory
+    command: cp -R /var/verafin/test /var/verafin/{{orgID}}
+      
+  - name: copy init script
+    copy:
+      src: /etc/init.d/verafin_horicon
+      dest: /etc/init.d/verafin_{{orgID}}
+      remote_src: yes
+
+  - name: add init script to chkconfig
+    command: chkconfig --add verafin_{{ orgID }}
+
+  - name: enable at startup
+    service:
+      name: verafin_{{orgID}}
+      enabled: yes

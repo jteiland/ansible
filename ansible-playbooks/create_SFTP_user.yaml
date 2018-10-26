@@ -1,0 +1,39 @@
+## YOU NEED TO INSTALL Passlib on your local machine to encrypt 'sudo pip install passlib'
+- name: Create user account
+  become: yes
+  become_method: sudo
+  hosts: sftp.malauzai.com 
+  gather_facts: False
+  serial: 1
+  vars_prompt:
+  - name: "user_name"
+    prompt: "What do you want for the username?"
+    private: no
+  - name: "password"
+    prompt: "Enter the randomly generated password for this user"
+    private: yes
+    encrypt: "sha512_crypt"
+    confirm: yes 
+
+  tasks:
+  - user:
+     name: "{{user_name}}"
+     comment: "Created with Ansible"
+     shell: /bin/false
+     group: sftp
+     password: "{{password}}"
+  - group:
+     name: "{{user_name}}"
+     state: present
+  - file: 
+     path: "~{{user_name}}"
+     owner: root
+     group: root
+     mode: 0755
+  - file:
+     path: "~{{user_name}}/uploads"
+     owner: "{{user_name}}"
+     group: "{{user_name}}"
+     state: directory
+     mode: 0700    
+     force: yes

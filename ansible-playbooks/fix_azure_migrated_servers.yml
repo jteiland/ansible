@@ -1,0 +1,42 @@
+---
+- hosts: azure_migrated
+  become: yes
+  tasks:
+    - name: stop jumpcloud and crond plus disable
+      with_items:
+            - jcagent
+            - crond
+      service: 
+        name: "{{ item }}"
+        state: stopped
+        enabled: no
+
+    - name: get current hostname
+      command: hostname
+      register: current_hostname
+    
+    - name: change hostname
+      with_items:
+        - "{{ current_hostname.stdout }}"
+      hostname:
+        name: "{{ current_hostname.stdout }}-test"
+
+    - name: update /etc/hosts
+      replace:
+        path: /etc/hosts
+        regexp: "{{ current_hostname.stdout }}"
+        replace: "{{ current_hostname.stdout }}-test"
+        backup: yes
+
+    - name: update /etc/sysconfig/network
+      replace:
+        path: /etc/sysconfig/network
+        regexp: "{{ current_hostname.stdout }}"
+        replace: "{{ current_hostname.stdout }}-test"
+        backup: yes
+
+    - name: confirm hostname
+      command: hostname
+ 
+    - name: add motd for reference
+      command: echo '#####This host is in Azure#####' >> /etc/motd

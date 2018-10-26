@@ -1,0 +1,8 @@
+- hosts: development
+  become: true
+  become_method: sudo
+  tasks:
+   - service:
+          name: yum-cron
+          state: stopped
+          enabled: yes

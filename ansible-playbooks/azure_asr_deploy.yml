@@ -1,0 +1,23 @@
+---
+- hosts: asr_centos6
+  become: yes
+  become_method: sudo
+  tasks: 
+    - name: copy file to server
+      unarchive:
+        src: files/Microsoft-ASR_UA_9.19.0.0_RHEL6-64_GA_14Aug2018_Release.tar.gz 
+        dest: /home/jason.eiland/
+    
+    - name: copy passphrase to server
+      copy: 
+        src: files/MobSvc.passphrase
+        dest: /home/jason.eiland/
+
+    - name: create ASR directory
+      command: mkdir -p /usr/local/ASR/
+      
+    - name: install into ASR dir
+      command: /home/jason.eiland/install -d /usr/local/ASR/ -r MS -v VmWare -q
+
+    - name: configure agent to talk to ASR server
+      command: /usr/local/ASR/Vx/bin/UnifiedAgentConfigurator.sh -i 10.255.150.3 -P /home/jason.eiland/MobSvc.passphrase

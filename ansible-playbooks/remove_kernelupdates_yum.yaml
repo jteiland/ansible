@@ -1,0 +1,12 @@
+- hosts: development 
+  become: true 
+  gather_facts: false
+  tasks:
+      - replace:
+          path: /etc/yum.conf
+          regexp: 'kernel\*'
+          replace: ''
+          backup: yes
+      - service:
+          name: yum-cron
+          state: restarted 

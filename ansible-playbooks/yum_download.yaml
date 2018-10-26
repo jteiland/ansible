@@ -1,0 +1,12 @@
+---
+- hosts: production 
+  serial: 5
+  tasks:
+    - name: clean cache
+      become: true
+      become_user: root
+      command: yum clean all
+    - name: yum download files
+      become: true
+      become_user: root
+      command: yum update -y --downloadonly

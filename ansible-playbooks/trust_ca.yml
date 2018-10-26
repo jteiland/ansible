@@ -1,0 +1,24 @@
+---
+- hosts: host_files 
+  become: yes
+  become_method: sudo
+  vars_prompt:
+  - name: "cert"
+    prompt: "Where is the cert location on your machine?"
+    private: no
+  - name: "cert_name"
+    prompt: "What should the cert be called?"
+    private: no
+
+  tasks: 
+    - name: copy file to server
+      copy:
+        src: "{{ cert }}"
+        dest: /etc/pki/ca-trust/source/anchors/"{{cert_name}}"
+        owner: root
+        group: root
+        mode: 0644
+        backup: yes
+
+    - name: update ca trust
+      command: update-ca-trust extract

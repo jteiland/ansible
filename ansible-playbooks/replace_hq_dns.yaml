@@ -1,0 +1,14 @@
+- hosts: dns_hq_servers  #this should be a local host file on your machine
+  become: true
+  become_method: sudo
+  gather_facts: no
+  tasks:
+     - name: replace alertengine-dev
+       replace: 
+         path: /etc/dnsmasq.hosts
+         regexp: '^192\.168\.104\.68[ ,\t]'
+         replace: '192.168.104.38 '
+
+     - service:
+          name: dnsmasq
+          state: restarted 

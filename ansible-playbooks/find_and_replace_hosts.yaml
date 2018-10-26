@@ -1,0 +1,11 @@
+- name: Look through /etc/hosts and replace IPs
+  hosts: rackspace 
+  gather_facts: no
+  become: true
+  become_method: sudo
+  tasks:
+     - name: replace alertengine-dev
+       replace: 
+         path: /etc/hosts
+         regexp: '^192\.168\.104\.68[ ,\t]'
+         replace: '192.168.104.38 '

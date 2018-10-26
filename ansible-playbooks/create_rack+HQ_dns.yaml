@@ -1,0 +1,61 @@
+## This playbook has two main plays, to add public DNS entries to Rackspace and private entries to our HQ server
+
+- name: Create DNS Records Rackspace Cloud
+  hosts: localhost                    # I created a localhost group in my /etc/ansible/hosts file with localhost as a member
+  serial: 1                          # avoid the Rackspace rate limiting
+  gather_facts: False
+  vars_prompt:
+   - name: "SWA_VIP"
+     prompt: "What VIP do you want to use for prod"
+     default: "23.253.187.139"    #if you enter nothing it will use the default
+     private: no
+
+   - name: "org_name"
+     prompt: "What should we use for the public route? Answer blah to get blah.cbzsecure.com"
+     private: no
+
+  tasks:
+    - name: Create A record for SWA prod
+      local_action:
+        module: rax_dns_record
+        credentials: ~/.raxpub    #https://docs.ansible.com/ansible/latest/scenario_guides/guide_rax.html#credentials-file
+        domain: cbzsecure.com
+        name: "{{org_name}}.cbzsecure.com"
+        data: "{{ SWA_VIP }}"
+        type: A
+      register: a_record
+
+    - name: Create A record for SWA preprod
+      local_action:
+        module: rax_dns_record
+        credentials: ~/.raxpub
+        domain: cbzsecure.com
+        name: "{{org_name}}-pp.cbzsecure.com"
+        data: "184.106.49.243"
+        type: A
+      register: a_record
+
+- name: Update Malauzai HQ DNS
+  hosts: dns_hq_servers  #this is defined in your ansible hosts file on your machine
+  become: true
+  become_method: sudo
+  gather_facts: False
+  vars_prompt:
+   - name: "org_name2"     #have to ask this again as the vars don't carry over from the other play
+     prompt: "What should we use for the private route( will only resolve from Malauzai HQ)? Answer blah to get blah.cbzsecure.com"
+     private: no
+  tasks:
+      - blockinfile:
+          dest: /etc/dnsmasq.hosts
+          state: present
+          block: |
+            {{item.ip }} {{ item.name }}
+          marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.name }}"
+          insertafter: EOF
+        with_items:
+          - { name: "{{org_name2}}-development.cbzsecure.com", ip: 192.168.104.71 }
+          - { name: "{{org_name2}}-staging.cbzsecure.com", ip: 192.168.104.71 }
+
+      - service:
+          name: dnsmasq
+          state: restarted
